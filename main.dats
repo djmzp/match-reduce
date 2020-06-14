@@ -137,7 +137,8 @@ fun dictionary_new(): Dict = list_vt_nil()
 fun dictionary_free(dict: Dict): void =
 	case+ dict of
 	| ~list_vt_nil() => ()
-	| ~(_, def) :: xs => (
+	| ~(s, def) :: xs => (
+		strptr_free(s);
 		expression_free(def);
 		dictionary_free(xs)
 	)
