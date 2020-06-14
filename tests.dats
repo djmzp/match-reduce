@@ -31,7 +31,7 @@ fun list_vt_equal_string(lx: !List_vt(string), ly: !List_vt(string)): bool =
 	| (list_vt_nil(), list_vt_cons(_,_)) => false
 
 
-fun convert(l: List_vt(string)): List_vt(Strptr1) =
+fun convert(l: List_vt(string)): [n: nat] expression(n) =
 	let
 		fun loop {n: nat} (l: List_vt(string), exp: list_vt(Strptr1, n)): Expression =
 			case+ l of

@@ -2,16 +2,9 @@
 
 #define ATS_DYNLOADFLAG 0
 
-//#include "share/HATS/atspre_staload_libats_ML.hats"
-
 /*
 	100 r_sum: ?x + ?y => $sum :x :y ;
 */
-
-// TODO this code uses a lot of extends because I'm dumb.
-// Change all extends that in reality are only cons()ing a list to list_vt_cons()
-// to do that, all dependent types have to expose the value they are depending on
-// in the function signature.
 
 overload close with fileref_close
 
@@ -24,9 +17,14 @@ dataviewtype Ske =
 	| ske_symbol of Strptr1	// w+
 	| ske_hole of Strptr1	// :w+
 
-viewtypedef Expression = List_vt(Strptr1)
-viewtypedef Pattern = List_vt(Pat)
-viewtypedef Skeleton = List_vt(Ske)
+viewtypedef expression(n: int) = list_vt(Strptr1, n)
+viewtypedef Expression = [n: nat] expression(n)
+
+viewtypedef pattern(n: int) = list_vt(Pat, n)
+viewtypedef Pattern = [n: nat] pattern(n)
+
+viewtypedef skeleton(n: int) = list_vt(Ske, n)
+viewtypedef Skeleton = [n: nat] skeleton(n)
 
 viewtypedef Rule = @{
 	precedence = int,
@@ -35,13 +33,7 @@ viewtypedef Rule = @{
 	skeleton = Skeleton
 }
 
-// TODO Pattern and Pat are used interchangeably but they are not the same
-// change the name of the functions / whatever necessary to keep them
-// consistent,
-// for example: pattern_free to pattern_list_free or something
-// or rather: pattern_print to pat_print
-
-fun pattern_free(pat: Pattern): void =
+fn pattern_free(pat: Pattern): void =
 	let
 		implement list_vt_freelin$clear<Pat>(e) =
 			case+ e of
@@ -52,38 +44,46 @@ fun pattern_free(pat: Pattern): void =
 		list_vt_freelin<Pat>(pat)
 	end
 
-fn pattern_print(pat: !Pat): void =
+fn pat_print(pat: !Pat): void =
 	case+ pat of
 	| pat_symbol(s) => print(s)
 	| pat_atom(s) => (print("?"); print(s))
 	| pat_mult(s) => (print("*"); print(s))
 
-fn skeleton_print(ske: !Ske): void =
+fn ske_print(ske: !Ske): void =
 	case+ ske of
 	| ske_symbol(s) => print(s)
 	| ske_hole(s) => (print(":"); print(s))
 
-overload print with pattern_print
-overload print with skeleton_print
+overload print with pat_print
+overload print with ske_print
 
 // TODO why doesnt ATS like my print implementations?????
-fun pattern_list_print(pat: !Pattern): void =
+fun pattern_print(pat: !Pattern): void =
 	case+ pat of
-	| list_vt_cons(p, ps) => (print(p); print(" "); pattern_list_print(ps))
+	| list_vt_cons(p, ps) => (
+		print(p);
+		print(" ");
+		pattern_print(ps)
+	)
 	| list_vt_nil() => ()
 
-overload gprint with pattern_list_print
+overload gprint with pattern_print
 
-fun skeleton_list_print(ske: !Skeleton): void =
+fun skeleton_print(ske: !Skeleton): void =
 	case+ ske of
-	| list_vt_cons(s, ss) => (print(s); print(" "); skeleton_list_print(ss))
+	| list_vt_cons(s, ss) => (
+		print(s);
+		print(" ");
+		skeleton_print(ss)
+	)
 	| list_vt_nil() => ()
 
-overload gprint with skeleton_list_print
+overload gprint with skeleton_print
 
 // overload fprint with pattern_list_print
 
-fun expression_free(exp: Expression): void =
+fn expression_free(exp: Expression): void =
 	let
 		implement list_vt_freelin$clear<Strptr1>(s) = strptr_free(s)
 	in
@@ -92,7 +92,7 @@ fun expression_free(exp: Expression): void =
 
 // overload free with expression_free <- doesnt even work
 
-fun expression_copy(exp: !Expression): Expression =
+fn expression_copy(exp: !Expression): Expression =
 	let
 		implement list_vt_copylin$copy<Strptr1>(s) = strptr1_copy(s)
 	in
@@ -101,7 +101,11 @@ fun expression_copy(exp: !Expression): Expression =
 
 fun expression_print(exp: !Expression): void =
 	case+ exp of
-	| list_vt_cons(s, es) => (print_strptr(s); print(" "); expression_print(es))
+	| list_vt_cons(s, es) => (
+		print_strptr(s);
+		print(" ");
+		expression_print(es)
+	)
 	| list_vt_nil() => ()
 
 overload gprint with expression_print
@@ -120,43 +124,35 @@ overload = with expression_equal
 
 #define :: list_vt_cons
 
-viewtypedef dict(n: int) = [n: int] list_vt(@(Strptr1, Expression), n)
-viewtypedef Dict = [n: int] dict(n)
+viewtypedef dictionary(n: int) = list_vt(@(Strptr1, Expression), n)
+viewtypedef Dictionary = [n: nat] dictionary(n)
 
-(*
-fun what(l: List_vt(int), l2: Option_vt(char)): void =
-	case+ l of
-	| ~list_vt_cons(_, xs) => what(xs, l2)
-	| ~list_vt_nil() => option_vt_free(l2)//???????????????????????????????????????????????????
-*)
+fn expression_new(): Expression = list_vt_nil()
 
-fun expression_new(): Expression = list_vt_nil()
+fn dictionary_new(): Dictionary = list_vt_nil()
 
-fun dictionary_new(): Dict = list_vt_nil()
-
-fun dictionary_free(dict: Dict): void =
+fun dictionary_free(dict: Dictionary): void =
 	case+ dict of
 	| ~list_vt_nil() => ()
-	| ~(s, def) :: xs => (
+	| ~(s, def)::xs => (
 		strptr_free(s);
 		expression_free(def);
 		dictionary_free(xs)
 	)
 
-fun dictionary_print(dict: !Dict): void =
+fun dictionary_print(dict: !Dictionary): void =
 	case+ dict of
 	| list_vt_nil() => ()
-	| x :: xs => (
+	| x::xs => (
 		print!(x.0, " = ");
 		expression_print(x.1);
-		//list_vt_free(def);
 		println!();
 		dictionary_print(xs)
 	)
 
 overload gprint with dictionary_print
 
-fun lookup(symbol: !Strptr1, dict: !Dict): Option_vt(Expression) =
+fun lookup(symbol: !Strptr1, dict: !Dictionary): Option_vt(Expression) =
 	case+ dict of
 	| list_vt_cons(x, ds) when compare_strptr_strptr(x.0, symbol) = 0 =>
 		Some_vt(expression_copy(x.1))
@@ -164,7 +160,7 @@ fun lookup(symbol: !Strptr1, dict: !Dict): Option_vt(Expression) =
 	| list_vt_nil() => None_vt()
 
 
-fun skeleton_free(ske: Skeleton): void =
+fn skeleton_free(ske: Skeleton): void =
 	let
 		implement list_vt_freelin$clear<Ske>(s) =
 			case+ s of
@@ -174,11 +170,11 @@ fun skeleton_free(ske: Skeleton): void =
 		list_vt_freelin<Ske>(ske)
 	end
 
-fun match(pat: !Pattern, exp: !Expression): Option_vt(Dict) =
+fn match(pat: !Pattern, exp: !Expression): Option_vt(Dictionary) =
 	let
 		val dict = dictionary_new();
 
-		fun loop(pat: !Pattern, exp: !Expression, dict: Dict, temp: Expression): Option_vt(Dict) =
+		fun loop {n: nat} (pat: !Pattern, exp: !Expression, dict: dictionary(n), temp: Expression): Option_vt(Dictionary) =
 			case+ (pat, exp) of
 			| (pat_symbol(s1)::ps, s2::es) when compare(s2, s1) = 0 => loop(ps, es, dict, temp) where {
 				// XXX ????? why am I extending the dictionary here anyways
@@ -190,7 +186,8 @@ fun match(pat: !Pattern, exp: !Expression): Option_vt(Dict) =
 				None_vt()
 			)
 			| (pat_atom(s1)::ps, s2::es) => loop(ps, es, dict', temp) where {
-				val dict' = list_vt_extend(dict, (strptr1_copy(s1), strptr1_copy(s2) :: list_vt_nil))
+				// val dict' = list_vt_extend(dict, (strptr1_copy(s1), strptr1_copy(s2) :: list_vt_nil))
+				val dict' = list_vt_cons((strptr1_copy(s1), strptr1_copy(s2) :: list_vt_nil), dict)
 			}
 			// PATTERN: some thing *what ever => ...  |||| and the expression is empty, dont match
 			| (pat_mult(s1)::_, list_vt_nil()) => (
@@ -200,7 +197,8 @@ fun match(pat: !Pattern, exp: !Expression): Option_vt(Dict) =
 			// PATTERN: some thing *end => ...
 			| (pat_mult(s1)::list_vt_nil(), _) => Some_vt(dict') where {
 				val () = expression_free(temp)
-				val dict' = list_vt_extend(dict, (strptr1_copy(s1), expression_copy(exp)))
+				// val dict' = list_vt_extend(dict, (strptr1_copy(s1), expression_copy(exp)))
+				val dict' = list_vt_cons((strptr1_copy(s1), expression_copy(exp)), dict)
 			}
 			// PATTERN: some thing *alot end => ...
 			| (pat_mult(s1)::pat_symbol(lookahead)::ps, s2::es) when compare(s2, lookahead) = 0 =>
@@ -208,7 +206,8 @@ fun match(pat: !Pattern, exp: !Expression): Option_vt(Dict) =
 				val temp' = expression_copy(temp)
 				val () = expression_free(temp)
 				val temp = $list_vt{Strptr1}()
-				val dict' = list_vt_extend(dict, (strptr1_copy(s1), temp'))
+				// val dict' = list_vt_extend(dict, (strptr1_copy(s1), temp'))
+				val dict' = list_vt_cons((strptr1_copy(s1), temp'), dict)
 			in
 				loop(ps, es, dict', temp)
 			end
@@ -217,11 +216,12 @@ fun match(pat: !Pattern, exp: !Expression): Option_vt(Dict) =
 			let
 				// XXX this used to be extend
 				// val tmp = list_vt_append(temp, s2::list_vt_nil())
-				val tmp = list_vt_extend(temp, strptr1_copy(s2))
+				// val tmp = list_vt_extend(temp, strptr1_copy(s2))
+				val tmp = list_vt_cons(strptr1_copy(s2), temp)
 			in
 				loop(pat, es, dict, tmp)
 			end
-			// TODO maybe not?
+			// XXX maybe not?
 			| (list_vt_nil(), _) => (
 				expression_free(temp);
 				Some_vt(dict)
@@ -239,10 +239,10 @@ fun match(pat: !Pattern, exp: !Expression): Option_vt(Dict) =
 	end
 
 
-fun instantiate(ske: !Skeleton, dict: !Dict): Option_vt(Expression) =
+fn instantiate(ske: !Skeleton, dict: !Dictionary): Option_vt(Expression) =
 	let
 		val exp: Expression = expression_new()
-		fun loop(ske: !Skeleton, dict: !Dict, exp: Expression): Option_vt(Expression) =
+		fun loop(ske: !Skeleton, dict: !Dictionary, exp: Expression): Option_vt(Expression) =
 			case+ ske of
 			| ske_symbol(s)::ss => loop(ss, dict, exp') where {
 				// XXX this used to be extend
