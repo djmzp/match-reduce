@@ -1,8 +1,5 @@
 #include "share/atspre_staload.hats"
 
-
-#include "main.dats"
-
 /*
 // XXX This doesn't work. But why
 extern fn {a: t@ype} list_vt_equal$eqfn(x: a, y: a): bool
@@ -31,7 +28,7 @@ fun list_vt_equal_string(lx: !List_vt(string), ly: !List_vt(string)): bool =
 	| (list_vt_nil(), list_vt_cons(_,_)) => false
 
 
-fun convert(l: List_vt(string)): [n: nat] expression(n) =
+fn convert(l: List_vt(string)): [n: nat] expression(n) =
 	let
 		fun loop {n: nat} (l: List_vt(string), exp: list_vt(Strptr1, n)): Expression =
 			case+ l of
@@ -160,5 +157,5 @@ fn run_tests(): void = (
 	test9()
 )
 
-implement main0() = run_tests()
+
 
