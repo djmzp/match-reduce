@@ -1,0 +1,4 @@
+0 0 start : main => same x x ;
+
+0 0 same : same ?x ?y => false ;
+0 1 same : same ?x ?x => true ;

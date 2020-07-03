@@ -1,5 +1,6 @@
 bug*
 *_?ats.c
 main
-test
 extra*
+tests.dats
+ftr.dats

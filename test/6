@@ -1,0 +1,10 @@
+0 0 start : main => unravel set_name Country( Portugal Madrid 47.431.256 505.990 ) Spain ;
+
+0 0 country_name       : get_name Country( ?n ?c ?p ?a ) => :n ;
+0 0 country_capital    : get_capital Country( ?n ?c ?p ?a ) => :c ;
+0 0 country_population : get_population Country( ?n ?c ?p ?a ) => :p ;
+0 0 country_area       : get_area Country( ?n ?c ?p ?a ) => :a ;
+
+0 0 set_name : set_name Country( ?n ?c ?p ?a ) ?name => Country( :name :c :p :a ) ;
+
+0 0 unravel : unravel Country( ?n ?c ?p ?a ) => Name: :n | Capital: :c | Population: :p | Area: :a ;

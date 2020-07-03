@@ -1,0 +1,12 @@
+0 0 start : main => (S (S Z ) ) + (S (S (S Z ) ) ) ;
+
+0 5 zero : Z => 0 ;
+0 5 suc0 : (S 0 ) => 1 ;
+0 5 suc1 : (S 1 ) => 2 ;
+0 5 suc2 : (S 2 ) => 3 ;
+0 5 suc3 : (S 3 ) => 4 ;
+0 5 suc4 : (S 4 ) => 5 ;
+0 5 suc5 : (S 5 ) => the_end ;
+
+0 6 add : *x + Z => :x ;
+0 6 add : *x + (S *y ) => (S :x + :y ) ;

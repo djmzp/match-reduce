@@ -1,0 +1,9 @@
+0 0 start : main => ( 2 + 3 ) * 3 + 4 ;
+0 0 paren : ( ?x ) => :x ;
+0 10 mult : ?x * ?y => :x :y mult ;
+0 5 add   : ?x + ?y => :x :y add ;
+
+
+0 0 temp : 5 3 mult => 15 ;
+0 0 temp : 2 3 add => 5 ;
+0 0 temp : 15 4 add => 19 ;

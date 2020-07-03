@@ -1,0 +1,10 @@
+1337 0 :/ : this => doesnt work ( for now ) ;
+
+0 0 start : main => (* G (/ (* kg kg ) (^ m 2 ) ) ) ;
+
+
+0 5 mult : (* ?x ?x ) => :x ;
+0 2 com : (* ?x ?y ) => (* :y :x ) ;
+0 2 multdiv : (* ?x (/ ?y ?z ) ) => (/ (* ?x ?y) ?z ) ;
+
+10 0 G : G => (* (^ m 3 ) (* (^ kg -1 ) (^ s -2 ) ) ) ;
