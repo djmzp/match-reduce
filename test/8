@@ -1,0 +1,6 @@
+0 0 start : main => sub efficient slow this extremely efficient
+	way of programming results in very efficient code ;
+
+0 1 substitute : sub ?x ?y ?x *tail => :y sub :x :y :tail ;
+0 0 substitute : sub ?x ?y ?z *tail => :z sub :x :y :tail ;
+0 0 substitute : sub ?x ?y => ;

@@ -4,3 +4,5 @@ main
 extra*
 tests.dats
 ftr.dats
+build.sh
+test/9
