@@ -51,5 +51,8 @@ TODO
 - [ ] Support for comments in the code, maybe `include` and `define` macros too.
 - [ ] Intrinsic functions (non-reducible expressions). Specially arithmetical and logical ones.
 - [ ] Actual support for multi-dimensional rules (multiple levels).
+- [ ] Add new wildcard that does not generate bindings but allows the matcher to "balance" the symbols refered to. Something like:  
+        `0 0 par : =( *exp =) => ... ;`  
+      that way, parenthesis would be correctly matched.
 - [ ] A lot of other stuff...
 
