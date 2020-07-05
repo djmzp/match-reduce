@@ -2,30 +2,28 @@
 // #define ATS_DYNLOADFLAG 0
 
 staload "./dictionary.sats"
-staload "./phrase.sats"
 staload "./pattern.sats"
+staload "./phrase.sats"
+staload "./rule.sats"
 staload "./skeleton.sats"
 staload "./string.sats"
 
 overload close with fileref_close
 
-viewtypedef Rule = @{
-	level = int,
-	precedence = int,
-	name = String,
-	pattern = Pattern,
-	skeleton = Skeleton
-}
-
 viewtypedef Grammar = @[Rule][12]
 
-// TODO make this a dependent type so that we can val+ without the compiler screaming
+#define EXP_NUM 0
+#define EXP_STR 1
+#define EXP_PAT 2
+#define EXP_SKE 3
+#define EXP_RUL 4
+
 dataviewtype exp(int) =
-	| num(0) of int
-	| str(1) of String
-	| pat(2) of Pattern
-	| ske(3) of Skeleton
-	| rul(4) of Rule
+	| num(EXP_NUM) of int
+	| str(EXP_STR) of String
+	| pat(EXP_PAT) of Pattern
+	| ske(EXP_SKE) of Skeleton
+	| rul(EXP_RUL) of Rule
 
 viewtypedef Exp = [n: nat] exp(n)
 
@@ -39,6 +37,30 @@ fun lookup(symbol: !String, dict: !Dictionary): Option_vt(Phrase) =
 	| list_vt_cons(_, ds) => lookup(symbol, ds)
 	| list_vt_nil() => None_vt()
 
+fn is_balanced {n: nat | n > 0} (ph: !Phrase, symbols: phrase(n)): bool =
+	let
+		val+ ~list_vt_cons(x, xs) = symbols
+		val o = ocurrences(ph, x)
+
+		fun loop(ph: !Phrase, symbols: Phrase): bool =
+			case+ symbols of
+			| ~list_vt_nil() => true
+			| ~list_vt_cons(x, xs) =>
+				let
+					val ocur = ocurrences(ph, x)
+				in
+					gfree(x);
+					if ocur = o then
+						loop(ph, xs)
+					else (
+						gfree(xs);
+						false
+					)
+				end
+	in
+		gfree(x);
+		loop(ph, xs)
+	end
 
 
 // Returns (if successful) a pair containing a dictionary and the tail of the expression that was not matched
@@ -399,21 +421,6 @@ fun streamize_fileref_word(file: FILEref): stream_vt(String) =
 	)
 
 
-fn rule_print(r: !Rule): void = (
-	print!(r.level, " ", r.precedence, " ", r.name, " : ");
-	pattern_print(r.pattern);
-	print("=> ");
-	skeleton_print(r.skeleton);
-)
-
-fn rule_free(r: Rule): void =
-	let
-		val+ @{level = l, precedence = p, name = n, pattern = pt, skeleton = sk} = r
-	in
-		strnptr_free(n);
-		pattern_free(pt);
-		skeleton_free(sk)
-	end
 
 fn print_ex(e: !Exp): void =
 	case+ e of
@@ -513,25 +520,6 @@ fn parse_rule(st: stream_vt(String)): Option_vt(@(exp(4), stream_vt(String))) =
 	end
 
 
-fn rule_is_valid(rule: !Rule): bool =
-	let
-		fun loop(ske: !Skeleton, pat: !Pattern): bool =
-			case+ ske of
-			| list_vt_nil() => true
-			| list_vt_cons(ske_symbol(_), ss) => loop(ss, pat)
-			| list_vt_cons(ske_hole(s), ss) => loop2(s, pat) && loop(ss, pat) // not tail recursive
-		and
-		loop2(s: !String, pat: !Pattern): bool =
-			case+ pat of
-			| list_vt_nil() => false
-			| list_vt_cons(pat_symbol(_), ps) => loop2(s, ps)
-			| list_vt_cons(pat_atom(p), ps) => if compare(s, p) = 0 then true else loop2(s, ps)
-			| list_vt_cons(pat_mult(p), ps) => if compare(s, p) = 0 then true else loop2(s, ps)
-	in
-		loop(rule.skeleton, rule.pattern) && length(rule.pattern) > 0
-	end
-
-
 fn try_rule(ph: !Phrase, rule: !Rule): Option_vt(Phrase) =
 	let
 		val copy = gcopy(ph)
@@ -594,19 +582,6 @@ fun try_rules(ph: !Phrase, rules: !List_vt(Rule)): Option_vt(@(String, Phrase)) 
 			| ~Some_vt(e) => Some_vt(@(name, e))
 		end
 
-fn rule_copy(r: !Rule): Rule =
-	let
-		val n = strnptr_copy(r.name)
-		val () = assertloc(strnptr_isnot_null(n))
-	in
-		@{
-			level = r.level,
-			precedence = r.precedence,
-			name = n,
-			pattern = pattern_copy(r.pattern),
-			skeleton = skeleton_copy(r.skeleton)
-		}
-	end
 
 
 fn filter_rules(rules: !List_vt(Rule), level: int): List_vt(Rule) =

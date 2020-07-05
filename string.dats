@@ -31,6 +31,8 @@ implement string_compare(str1, str2) =
 		res
 	end
 
+implement string_equal(str1, str2) = string_compare(str1, str2) = 0
+
 implement string_print(str) = print_strnptr(str)
 
 extern fun memmove(dst: ptr, src: ptr, size: ssize_t): void = "mac#"

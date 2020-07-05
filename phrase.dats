@@ -45,3 +45,15 @@ implement phrase_free(ph)=
 	in
 		list_vt_freelin<String>(ph)
 	end
+
+
+implement ocurrences(ph, symbol) =
+	let
+		fun loop(ph: !Phrase, symbol: !String, ocur: int): int =
+			case+ ph of
+			| list_vt_nil() => ocur
+			| list_vt_cons(s, ss) when s = symbol => loop(ss, symbol, ocur + 1)
+			| list_vt_cons(s, ss) => loop(ss, symbol, ocur)
+	in
+		loop(ph, symbol, 0)
+	end

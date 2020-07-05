@@ -4,6 +4,9 @@ dataviewtype Pat =
 	| pat_symbol of String	// w+
 	| pat_atom of String	// ?w+
 	| pat_mult of String	// *w+
+	| pat_bal of String		// =w+
+	| pat_under				// _
+	| pat_ellip				// ...
 	// TODO add placeholders _ and ...
 
 viewtypedef pattern(n: int) = list_vt(Pat, n)
