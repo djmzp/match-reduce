@@ -20,14 +20,14 @@ viewtypedef Rule = @{
 viewtypedef Grammar = @[Rule][12]
 
 // TODO make this a dependent type so that we can val+ without the compiler screaming
-dataviewtype Exp =
-	| num of int
-	| str of String
-	| pat of Pattern
-	| ske of Skeleton
-	| rul of Rule
+dataviewtype exp(int) =
+	| num(0) of int
+	| str(1) of String
+	| pat(2) of Pattern
+	| ske(3) of Skeleton
+	| rul(4) of Rule
 
-
+viewtypedef Exp = [n: nat] exp(n)
 
 #define :: list_vt_cons
 
@@ -252,7 +252,7 @@ fn strnptr2int {m: nat | m > 0} (s: strnptr(m)): Option_vt(int) =
 		)
 	end
 
-fn parse_string(st: stream_vt(String)): Option_vt(@(Exp, stream_vt(String))) =
+fn parse_string(st: stream_vt(String)): Option_vt(@(exp(1), stream_vt(String))) =
 	let
 		val st' = stream_vt_uncons<String>(st)
 	in
@@ -261,7 +261,7 @@ fn parse_string(st: stream_vt(String)): Option_vt(@(Exp, stream_vt(String))) =
 		| ~None_vt() => None_vt()
 	end
 
-fn parse_string_matching(st: stream_vt(String), match: string): Option_vt(@(Exp, stream_vt(String))) =
+fn parse_string_matching(st: stream_vt(String), match: string): Option_vt(@(exp(1), stream_vt(String))) =
 	let
 		val st = stream_vt_uncons<String>(st)
 	in
@@ -286,7 +286,7 @@ fn parse_string_matching(st: stream_vt(String), match: string): Option_vt(@(Exp,
 		| ~None_vt() => None_vt()
 	end
 
-fn parse_int(st: stream_vt(String)): Option_vt(@(Exp, stream_vt(String))) =
+fn parse_int(st: stream_vt(String)): Option_vt(@(exp(0), stream_vt(String))) =
 	let
 		val st' = stream_vt_uncons<String>(st)
 	in
@@ -312,9 +312,9 @@ fn parse_int(st: stream_vt(String)): Option_vt(@(Exp, stream_vt(String))) =
 		| ~None_vt() => None_vt()
 	end
 
-fn parse_pat(st: stream_vt(String)): Option_vt(@(Exp, stream_vt(String))) =
+fn parse_pat(st: stream_vt(String)): Option_vt(@(exp(2), stream_vt(String))) =
 	let
-		fun loop {n: nat} (st: stream_vt(String), p: pattern(n)): Option_vt(@(Exp, stream_vt(String))) =
+		fun loop {n: nat} (st: stream_vt(String), p: pattern(n)): Option_vt(@(exp(2), stream_vt(String))) =
 			let
 				val st = stream_vt_uncons<String>(st)
 			in
@@ -345,9 +345,9 @@ fn parse_pat(st: stream_vt(String)): Option_vt(@(Exp, stream_vt(String))) =
 		loop(st, $list_vt{Pat}())
 	end
 
-fn parse_skeleton(st: stream_vt(String)): Option_vt(@(Exp, stream_vt(String))) =
+fn parse_skeleton(st: stream_vt(String)): Option_vt(@(exp(3), stream_vt(String))) =
 	let
-		fun loop {n: nat} (st: stream_vt(String), sk: skeleton(n)): Option_vt(@(Exp, stream_vt(String))) =
+		fun loop {n: nat} (st: stream_vt(String), sk: skeleton(n)): Option_vt(@(exp(3), stream_vt(String))) =
 			let
 				val st = stream_vt_uncons<String>(st)
 			in
@@ -446,7 +446,7 @@ fun free_exp(e: List_vt(Exp)): void =
 macdef parse_keyword = parse_string_matching
 
 // Don't look
-fn parse_rule(st: stream_vt(String)): Option_vt(@(Exp, stream_vt(String))) =
+fn parse_rule(st: stream_vt(String)): Option_vt(@(exp(4), stream_vt(String))) =
 	let
 		val level = parse_int(st)
 	in
@@ -475,7 +475,7 @@ fn parse_rule(st: stream_vt(String)): Option_vt(@(Exp, stream_vt(String))) =
 								| ~None_vt() => (println!("Expected colon (:)"); free_ex(l); free_ex(p); free_ex(n); None_vt())
 								| ~Some_vt(t) =>
 									let
-										val- ~str(col) = t.0
+										val+ ~str(col) = t.0
 										val patt = parse_pat(t.1)
 									in
 										strnptr_free(col);
@@ -483,17 +483,17 @@ fn parse_rule(st: stream_vt(String)): Option_vt(@(Exp, stream_vt(String))) =
 										| ~None_vt() => (free_ex(l); free_ex(p); free_ex(n); None_vt())
 										| ~Some_vt(t) =>
 											let
-												val- ~pat(pt) = t.0
+												val+ ~pat(pt) = t.0
 												val skel = parse_skeleton(t.1)
 											in
 												case+ skel of
 												| ~None_vt() => (free_ex(l); free_ex(p); free_ex(n); pattern_free(pt); None_vt())
 												| ~Some_vt(t) =>
 													let
-														val- ~num(l) = l
-														val- ~num(p) = p
-														val- ~str(n) = n
-														val- ~ske(sk) = t.0
+														val+ ~num(l) = l
+														val+ ~num(p) = p
+														val+ ~str(n) = n
+														val+ ~ske(sk) = t.0
 														val rule = @{
 															level = l,
 															precedence = p,
@@ -653,7 +653,7 @@ implement main0(argc, argv) =
 				| ~None_vt() => rules
 				| ~Some_vt(t) =>
 					let
-						val- ~rul(r) = t.0
+						val+ ~rul(r) = t.0
 						val st: stream_vt(String) = t.1
 					in
 						if rule_is_valid(r) then
