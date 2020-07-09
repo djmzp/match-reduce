@@ -59,3 +59,7 @@ TODO
 - [ ] Add suport of literals: numbers, strings, characters...
 - [ ] A lot of other stuff...
 
+LICENSE
+=======
+Unless *explicitly* stated inside of an individual file, the code is under the MIT/X11 license.
+Check [LICENSE](LICENSE) for more information.
