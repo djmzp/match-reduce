@@ -7,7 +7,7 @@ staload "./string.sats"
 
 #include "share/atspre_staload.hats"
 
-implement rule_is_valid(rule): bool =
+implement rule_is_valid(r) =
 	let
 		fun loop(ske: !Skeleton, pat: !Pattern): bool =
 			case+ ske of
@@ -25,7 +25,7 @@ implement rule_is_valid(rule): bool =
 			| list_vt_cons(pat_under(), ps) => loop2(s, ps)
 			| list_vt_cons(pat_ellip(), ps) => loop2(s, ps)
 	in
-		loop(rule.skeleton, rule.pattern) && length(rule.pattern) > 0
+		loop(r.skeleton, r.pattern) && length(r.pattern) > 0
 	end
 
 implement rule_copy(r) =

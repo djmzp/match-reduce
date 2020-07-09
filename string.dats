@@ -33,6 +33,17 @@ implement string_compare(str1, str2) =
 
 implement string_equal(str1, str2) = string_compare(str1, str2) = 0
 
+implement string_compare_stack(str, s) =
+	let
+		val s = string_new(s)
+		val res = string_compare(str, s)
+	in
+		string_free(s);
+		res
+	end
+
+implement string_equal_stack(str, s) = string_compare_stack(str, s) = 0
+
 implement string_print(str) = print_strnptr(str)
 
 extern fun memmove(dst: ptr, src: ptr, size: ssize_t): void = "mac#"

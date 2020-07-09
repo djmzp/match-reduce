@@ -49,10 +49,13 @@ TODO
 ====
 - [ ] Wildcard patterns `_` and `...` that do not generate bindings.
 - [ ] Support for comments in the code, maybe `include` and `define` macros too.
+    - [x] Multi-line comments are now supported but `/*` and `*/` are still treated like individual symbols so they also have to be limited by whitespaces.
+    (Maybe have a preprocessor take care of everything?)
 - [ ] Intrinsic functions (non-reducible expressions). Specially arithmetical and logical ones.
 - [ ] Actual support for multi-dimensional rules (multiple levels).
-- [ ] Add new wildcard that does not generate bindings but allows the matcher to "balance" the symbols refered to. Something like:  
-        `0 0 par : =( *exp =) => ... ;`  
+- [ ] Add new wildcard that does not generate bindings but allows the matcher to "balance" the symbols refered to. Something like:
+        `0 0 par : =( *exp =) => ... ;`
       that way, parenthesis would be correctly matched.
+- [ ] Add suport of literals: numbers, strings, characters...
 - [ ] A lot of other stuff...
 

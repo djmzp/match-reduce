@@ -69,6 +69,7 @@ fn match(ph: Phrase, pat: !Pattern): Option_vt(@(Dictionary, Phrase)) =
 		val dict = dictionary_new();
 
 		fun loop {n: nat} (pat: !Pattern, ph: Phrase, dict: dictionary(n), temp: Phrase): Option_vt(@(Dictionary, Phrase)) =
+			// TODO change this case+ to pattern match only on the pattern
 			case+ (pat, ph) of
 			| (pat_symbol(s1)::ps, ~s2::es) when compare(s1, s2) = 0 => (
 				gfree(s2);
@@ -108,17 +109,19 @@ fn match(ph: Phrase, pat: !Pattern): Option_vt(@(Dictionary, Phrase)) =
 						end
 				end
 			)
-			// PATTERN: some thing *what ever => ...  |||| and the expression is empty, dont match
-			| (pat_mult(s1)::_, list_vt_nil()) => (
-				gfree(temp);
-				Some_vt(@(dict, ph))
-			)
-			// PATTERN: some thing *end => ...
+
 			| (pat_mult(s1)::list_vt_nil(), _) => Some_vt(@(dict', list_vt_nil())) where {
 				val () = gfree(temp)
-				val dict' = list_vt_cons((string_copy(s1), ph), dict)
+				val dict' = list_vt_cons((gcopy(s1), ph), dict)
 			}
-			// PATTERN: some thing *lots end => ...
+
+			| (pat_mult(s1)::ps, list_vt_nil()) => (
+				gfree(temp);
+				gfree(dict);
+				gfree(ph);
+				None_vt()
+			)
+
 			| (pat_mult(s1)::pat_symbol(lookahead)::ps, ~s2::es) when compare(s2, lookahead) = 0 =>
 			let
 				val temp' = gcopy(temp)
@@ -135,6 +138,7 @@ fn match(ph: Phrase, pat: !Pattern): Option_vt(@(Dictionary, Phrase)) =
 			in
 				loop(pat, es, dict, tmp)
 			end
+
 			/*
 			| (pat_mult(s1)::ps, ~s2::es) => (
 				case+ ps of
@@ -177,7 +181,8 @@ fn match(ph: Phrase, pat: !Pattern): Option_vt(@(Dictionary, Phrase)) =
 
 			)
 			*/
-			// XXX maybe not?
+
+
 			| (list_vt_nil(), _) => (
 				gfree(temp);
 				Some_vt(@(dict, ph))
@@ -308,7 +313,7 @@ fn parse_string_matching(st: stream_vt(String), match: string): Option_vt(@(exp(
 		| ~None_vt() => None_vt()
 	end
 
-fn parse_int(st: stream_vt(String)): Option_vt(@(exp(0), stream_vt(String))) =
+fn parse_int(st: stream_vt(String)): Option_vt(@(exp(EXP_NUM), stream_vt(String))) =
 	let
 		val st' = stream_vt_uncons<String>(st)
 	in
@@ -334,9 +339,9 @@ fn parse_int(st: stream_vt(String)): Option_vt(@(exp(0), stream_vt(String))) =
 		| ~None_vt() => None_vt()
 	end
 
-fn parse_pat(st: stream_vt(String)): Option_vt(@(exp(2), stream_vt(String))) =
+fn parse_pat(st: stream_vt(String)): Option_vt(@(exp(EXP_PAT), stream_vt(String))) =
 	let
-		fun loop {n: nat} (st: stream_vt(String), p: pattern(n)): Option_vt(@(exp(2), stream_vt(String))) =
+		fun loop {n: nat} (st: stream_vt(String), p: pattern(n)): Option_vt(@(exp(EXP_PAT), stream_vt(String))) =
 			let
 				val st = stream_vt_uncons<String>(st)
 			in
@@ -367,9 +372,9 @@ fn parse_pat(st: stream_vt(String)): Option_vt(@(exp(2), stream_vt(String))) =
 		loop(st, $list_vt{Pat}())
 	end
 
-fn parse_skeleton(st: stream_vt(String)): Option_vt(@(exp(3), stream_vt(String))) =
+fn parse_skeleton(st: stream_vt(String)): Option_vt(@(exp(EXP_SKE), stream_vt(String))) =
 	let
-		fun loop {n: nat} (st: stream_vt(String), sk: skeleton(n)): Option_vt(@(exp(3), stream_vt(String))) =
+		fun loop {n: nat} (st: stream_vt(String), sk: skeleton(n)): Option_vt(@(exp(EXP_SKE), stream_vt(String))) =
 			let
 				val st = stream_vt_uncons<String>(st)
 			in
@@ -410,13 +415,11 @@ fun streamize_fileref_word(file: FILEref): stream_vt(String) =
 				val st = strptr2strnptr(fileref_get_word(file))
 			in
 				if strnptr_isnot_null(st) * (strnptr_length(st) > 0) then
-					stream_vt_cons(
-						st,
-						streamize_fileref_word(file)
-					)
+					stream_vt_cons(st, streamize_fileref_word(file))
 				else (
 					strnptr_free(st);
-					stream_vt_nil())
+					stream_vt_nil()
+				)
 			end
 	)
 
@@ -438,19 +441,27 @@ fn free_ex(e: Exp): void =
 	| ~ske(s) => skeleton_free(s)
 	| ~rul(r) => rule_free(r)
 
-
 fun free_exp(e: List_vt(Exp)): void =
 	case+ e of
 	| ~list_vt_cons(~num(_), es) => free_exp(es)
 	| ~list_vt_cons(~str(s), es) => (strnptr_free(s); free_exp(es))
 	| ~list_vt_cons(~pat(p), es) => (pattern_free(p); free_exp(es))
 	| ~list_vt_cons(~ske(s), es) => (skeleton_free(s); free_exp(es))
-	| ~list_vt_cons(~rul(s), es) => (rule_free(s); free_exp(es))
+	| ~list_vt_cons(~rul(r), es) => (rule_free(r); free_exp(es))
 	| ~list_vt_nil() => ()
 
-
-
 macdef parse_keyword = parse_string_matching
+
+// The delicate art of working with linear streams
+fn stream_vt_peek(st: stream_vt(String)): @(Option_vt(String), stream_vt(String)) =
+	let
+		val s = !st
+	in
+		case+ s of
+		| ~stream_vt_nil() => @(None_vt(), $ldelay(stream_vt_nil()))
+		| ~stream_vt_cons(x, xs) => @(Some_vt(gcopy(x)), $ldelay(stream_vt_cons(x, xs), (~xs; gfree(x))))
+	end
+
 
 // Don't look
 fn parse_rule(st: stream_vt(String)): Option_vt(@(exp(4), stream_vt(String))) =
@@ -584,6 +595,7 @@ fun try_rules(ph: !Phrase, rules: !List_vt(Rule)): Option_vt(@(String, Phrase)) 
 
 
 
+
 fn filter_rules(rules: !List_vt(Rule), level: int): List_vt(Rule) =
 	let
 		fun loop {n: nat} (rules: !List_vt(Rule), ac: list_vt(Rule, n)): List_vt(Rule) =
@@ -603,6 +615,26 @@ fun add_rule {n: nat} (rules: list_vt(Rule, n), rule: Rule): list_vt(Rule, n + 1
 	| ~list_vt_nil() => $list_vt{Rule}(rule)
 
 
+// Since comments are ignored, this function does not have to return a tuple
+fun skip_comment(st: stream_vt(String)): Option_vt(stream_vt(String)) =
+	let
+		val opt = stream_vt_uncons<String>(st)
+	in
+		case+ opt of
+		| ~None_vt() => None_vt()
+		| ~Some_vt(t) =>
+			let
+				val s = t.0
+				val st = t.1
+				val b = s = "*/"
+			in
+				gfree(s);
+				if b then
+					Some_vt(st)
+				else
+					skip_comment(st)
+			end
+	end
 
 implement main0(argc, argv) =
 	let
@@ -620,9 +652,27 @@ implement main0(argc, argv) =
 
 		val stream = streamize_fileref_word(file)
 
+		// TODO This function is really bad now that rules are not the only thing that can be expected
+		// inside a file. Change it so it's not so "rule-centric"
 		fun read_rules {n: nat} (st: stream_vt(String), rules: list_vt(Rule, n)): List_vt(Rule) =
 			let
-				val out = parse_rule(st)
+				val @(t, st) = stream_vt_peek(st)
+				val out = (
+					case+ t of
+					| ~None_vt() => parse_rule(st)
+					| ~Some_vt(s) when s = "/*" =>
+						(
+							gfree(s);
+							let
+								val opt = skip_comment(st)
+							in
+								case+ opt of
+								| ~None_vt() => None_vt()
+								| ~Some_vt(st) => parse_rule(st)
+							end
+						)
+					| ~Some_vt(s) => (gfree(s); parse_rule(st))
+				): Option_vt(@(exp(4), stream_vt(String)))
 			in
 				case+ out of
 				| ~None_vt() => rules

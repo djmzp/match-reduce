@@ -24,3 +24,4 @@ fn pattern_free(Pattern): void
 overload gprint with pat_print
 
 overload gprint with pattern_print
+overload gfree with pattern_free
