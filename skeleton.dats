@@ -14,6 +14,10 @@ implement ske_from_string(str) =
 			string_cut_head(str);
 			ske_hole(str)
 		)
+		| '%' when length(str) > 1 => (
+			string_cut_head(str);
+			ske_reduce(str)
+		)
 		| _ => ske_symbol(str)
 	end
 
@@ -21,16 +25,19 @@ implement ske_print(s) =
 	case+ s of
 	| ske_symbol(s) => print(s)
 	| ske_hole(s) => (print(":"); print(s))
+	| ske_reduce(s) => (print("%"); print(s))
 
 implement ske_copy(s) =
 	case+ s of
 	| ske_symbol(s) => ske_symbol(gcopy(s))
 	| ske_hole(s) => ske_hole(gcopy(s))
+	| ske_reduce(s) => ske_reduce(gcopy(s))
 
 implement ske_free(s) =
 	case+ s of
-	| ~ske_symbol(s) => strnptr_free(s)
-	| ~ske_hole(s) => strnptr_free(s)
+	| ~ske_symbol(s) => string_free(s)
+	| ~ske_hole(s) => string_free(s)
+	| ~ske_reduce(s) => string_free(s)
 
 
 implement skeleton_print(ske) =

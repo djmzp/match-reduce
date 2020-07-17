@@ -6,3 +6,5 @@ tests.dats
 ftr.dats
 build.sh
 test/9
+massif*
+vgcore*

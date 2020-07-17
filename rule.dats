@@ -7,6 +7,8 @@ staload "./string.sats"
 
 #include "share/atspre_staload.hats"
 
+// For a rule to be valid, its pattern cannot be empty and the skeleton variables'
+// identifiers have to appear in the pattern
 implement rule_is_valid(r) =
 	let
 		fun loop(ske: !Skeleton, pat: !Pattern): bool =
@@ -14,6 +16,7 @@ implement rule_is_valid(r) =
 			| list_vt_nil() => true
 			| list_vt_cons(ske_symbol(_), ss) => loop(ss, pat)
 			| list_vt_cons(ske_hole(s), ss) => loop2(s, pat) && loop(ss, pat) // not tail recursive
+			| list_vt_cons(ske_reduce(s), ss) => loop2(s, pat) && loop(ss, pat)
 		and
 		loop2(s: !String, pat: !Pattern): bool =
 			case+ pat of
@@ -25,7 +28,7 @@ implement rule_is_valid(r) =
 			| list_vt_cons(pat_under(), ps) => loop2(s, ps)
 			| list_vt_cons(pat_ellip(), ps) => loop2(s, ps)
 	in
-		loop(r.skeleton, r.pattern) && length(r.pattern) > 0
+		loop(r.skeleton, r.pattern) && pattern_length(r.pattern) > 0
 	end
 
 implement rule_copy(r) =

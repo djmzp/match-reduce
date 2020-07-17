@@ -63,6 +63,26 @@ implement pat_free(p) =
 	| ~pat_under() => ()
 	| ~pat_ellip() => ()
 
+implement pat_free'(p) =
+	case+ p of
+	| ~pat_symbol(s) => gfree(s)
+	| ~pat_atom(s) => gfree(s)
+	| ~pat_mult(s) => gfree(s)
+	| ~pat_bal(s) => gfree(s)
+	| ~pat_under() => ()
+	| ~pat_ellip() => ()
+
+implement pattern_length(pat) =
+	let
+		fun loop {n: nat} (pat: !Pattern, acc: int(n)): [m: nat | m >= n] int(m) =
+			case+ pat of
+			| list_vt_cons(pat_mult(_), ps) => loop(ps, acc)
+			| list_vt_cons(pat_ellip(), ps) => loop(ps, acc)
+			| list_vt_cons(_, ps) => loop(ps, acc + 1)
+			| list_vt_nil() => acc
+	in
+		loop(pat, 0)
+	end
 
 implement pattern_print(pat) =
 	case+ pat of

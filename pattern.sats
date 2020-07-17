@@ -16,12 +16,16 @@ fn pat_from_string(String): Pat
 fn pat_print(!Pat): void
 fn pat_copy(!Pat): Pat
 fn pat_free(&Pat >> Pat?):<!wrt> void
+fn pat_free'(Pat): void
 
+// This is not the actual length but a relative length to discard phrases that may not match
+fn pattern_length(!Pattern): [n: nat] int(n)
 fn pattern_print(!Pattern): void
 fn pattern_copy(!Pattern): Pattern
 fn pattern_free(Pattern): void
 
 overload gprint with pat_print
+overload gcopy with pat_copy
 
 overload gprint with pattern_print
 overload gfree with pattern_free

@@ -1,0 +1,6 @@
+0 0 main : main => a b c d e f g h i j k ;
+
+/* 0 0 mult : a *x g h *y => :x | :y ; */
+
+0 0 mult : a b c d e *x ?h ?i => :i :h :x ;
+
