@@ -4,10 +4,10 @@ viewtypedef String = Strnptr11
 
 fn string_new {n: nat | n > 0} (string(n)): String
 fn string_copy(!String): String
-fn string_compare(!String, !String): Sgn
+fn string_compare(!String, !String): int
 fn string_equal(!String, !String): bool
 // For comparison with stack allocated strings
-fn string_compare_stack {n: nat | n > 0} (!String, string(n)): Sgn
+fn string_compare_stack {n: nat | n > 0} (!String, string(n)): int
 fn string_equal_stack {n: nat | n > 0} (!String, string(n)): bool
 fn string_print(!String): void
 fn string_cut_head {n: int | n > 0} (s: !strnptr11(n)): void

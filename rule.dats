@@ -8,7 +8,8 @@ staload "./string.sats"
 #include "share/atspre_staload.hats"
 
 // For a rule to be valid, its pattern cannot be empty and the skeleton variables'
-// identifiers have to appear in the pattern
+// identifiers have to appear in the pattern.
+// TODO Also only 2 balanced symbols may appear
 implement rule_is_valid(r) =
 	let
 		fun loop(ske: !Skeleton, pat: !Pattern): bool =
@@ -33,8 +34,7 @@ implement rule_is_valid(r) =
 
 implement rule_copy(r) =
 	let
-		val n = strnptr_copy(r.name)
-		val () = assertloc(strnptr_isnot_null(n))
+		val n = string_copy(r.name)
 	in
 		@{
 			level = r.level,

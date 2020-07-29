@@ -4,6 +4,5 @@
 0 5 add   : ?x + ?y => :x :y add ;
 
 
-0 0 temp : 5 3 mult => 15 ;
-0 0 temp : 2 3 add => 5 ;
-0 0 temp : 15 4 add => 19 ;
+0 0 * : ?x ?y mult => $mult :x :y ;
+0 0 + : ?x ?y add => $add :x :y ;

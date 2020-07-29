@@ -21,7 +21,7 @@ fn pat_free'(Pat): void
 // This is not the actual length but a relative length to discard phrases that may not match
 fn pattern_length(!Pattern): [n: nat] int(n)
 fn pattern_print(!Pattern): void
-fn pattern_copy(!Pattern): Pattern
+fn pattern_copy {n: nat} (!pattern(n)): pattern(n)
 fn pattern_free(Pattern): void
 
 overload gprint with pat_print

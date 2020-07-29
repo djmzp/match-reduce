@@ -57,6 +57,7 @@ TODO
       that way, parenthesis would be correctly matched.
 - [ ] Add new skeleton wildcard that reduces an expression right after instantiating it.
 - [ ] Add suport of literals: numbers, strings, characters...
+- [ ] Add another kind of rule that implicitly inserts `...` at both ends of the pattern.
 - [ ] A lot of other stuff...
 
 LICENSE

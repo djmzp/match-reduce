@@ -4,7 +4,7 @@ viewtypedef phrase(n: int) = list_vt(String, n)
 viewtypedef Phrase = [n: nat] phrase(n)
 
 fn phrase_new(): phrase(0)
-fn phrase_copy(!Phrase): Phrase
+fn phrase_copy {n: nat} (!phrase(n)): phrase(n)
 fn phrase_equal(!Phrase, !Phrase): bool
 fn phrase_print(!Phrase): void
 fn phrase_free(Phrase): void

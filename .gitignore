@@ -1,3 +1,4 @@
+new
 bug*
 *_?ats.c
 main
@@ -8,3 +9,5 @@ build.sh
 test/9
 massif*
 vgcore*
+callgraph*
+callgrind*

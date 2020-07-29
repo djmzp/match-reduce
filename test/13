@@ -1,0 +1,64 @@
+/* This file contains a lot of Haskell looking examples */
+/* 0 0 x : main => length ( [ 1 2 3 4 ] ++ [ 5 6 ] ) ; */
+/* 0 0 x : main => length [ 1 2 3 4 5 ] ; */
+/* 0 0 x : main => map f [ 1 2 3 4 5 ] ; */
+/* 0 0 x : main => (*) 2 foldr (+) 0 (1 XS ++ [ 10 ] 1) ; */
+/* 0 0 x : main => 30 ! ; */
+/* 0 0 x : main => fib 20 ; */
+0 0 x : main => M91 54 ;
+
+0 3 d : XS => [ 0 .. 100 ] ;
+
+0 1 .. : ?x .. ?x => :x ;
+0 1 .. : ?x .. ?y => :x :x + 1 .. :y ;
+0 0 f : f ?x => $mult 10 :x ;
+
+0 0 (+) : (+) ?x ?y => :x + :y ;
+0 0 (*) : (*) ?x ?y => :x * :y ;
+
+0 3 make-list : make-list ?x => [ :x ] ;
+
+0 3 $ : ?f $ *x => :f red :x ;
+0 4 red : red *x => :x ;
+
+0 3 ++ : [ *xs ] ++ [ *ys ] => append [ :xs ] [ :ys ] ;
+0 3 append : append [ *xs ] [ *ys ] => [ :xs :ys ] ;
+
+0 3 length : length [ ] => 0 ;
+0 3 length : length [ _ *xs ] => 1 + length [ :xs ] ;
+
+0 3 map : map ?f [ ?x *xs ] => :f :x map :f [ :xs ] ;
+0 2 map : map ?f [ ] => ;
+
+0 6 foldr : foldr ?f ?b [ ?x *xs ] => :f :x foldr :f :b [ :xs ] ;
+0 6 foldr : foldr ?f ?b [ ] => :b ;
+
+0 2 add : ?x + ?y => $add :x :y ;
+0 4 mult : ?x * ?y => $mult :x :y ;
+0 5 lt : ?x < ?y => $lt :x :y ;
+
+/* These rules should only reduce atomic expressions */
+0 9 par : (1 *xs 2) => :xs ;
+0 9 par : (1 *xs 1) => :xs ;
+0 9 par : ( *xs ) => :xs ;
+0 0 par_list : ( [ *xs ] ) => [ :xs ] ;
+0 0 par : ( ?x ) => :x ;
+
+0 3 fib : fib 0 => 0 ;
+0 3 fib : fib 1 => 1 ;
+0 3 fib : fib ?x => fib ( :x + -1 ) + fib ( :x + -2 ) ;
+
+0 3 ! : ?x ! => fact :x ;
+0 3 fact : fact ?x => factorial 1 :x ;
+0 3 fact : factorial ?ac 0 => :ac ;
+0 3 fact : factorial ?ac ?x => factorial ( :ac * :x ) ( :x + -1 ) ;
+
+0 10 if-else : if true then *e1 else ... end => :e1 ;
+0 10 if-else : if false then ... else *e2 end => :e2 ;
+
+0 0 M91 : M91 ?x => if ( :x < 101 ) then
+						M91 ( M91 :x + 11 )
+					 else
+					 	:x + -10
+					 end ;
+

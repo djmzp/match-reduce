@@ -1,0 +1,7 @@
+0 0 x : main => | -2 | * 3 + 1 * 4 + 2 * 3 * 5 * -1 ;
+0 0 add : ?x + ?y => $add :x :y ;
+0 1 mult : ?x * ?y => $mult :x :y ;
+0 3 lt : ?x < ?y => $lt :x :y ;
+0 2 if-else : if true then *e1 else ... end => :e1 ;
+0 2 if-else : if false then ... else *e2 end => :e2 ;
+0 3 abs : | ?x | => if :x < 0 then $mult :x -1 else :x end ;
