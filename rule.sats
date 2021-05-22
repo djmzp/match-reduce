@@ -7,7 +7,8 @@ viewtypedef Rule = @{
 	precedence = int,
 	name = String,
 	pattern = Pattern,
-	skeleton = Skeleton
+	skeleton = Skeleton,
+	kind = int // whether the rule is "=>" or "=>>"
 }
 
 fn rule_is_valid(!Rule): bool

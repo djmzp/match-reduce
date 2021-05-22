@@ -41,7 +41,8 @@ implement rule_copy(r) =
 			precedence = r.precedence,
 			name = n,
 			pattern = pattern_copy(r.pattern),
-			skeleton = skeleton_copy(r.skeleton)
+			skeleton = skeleton_copy(r.skeleton),
+			kind = r.kind
 		}
 	end
 
@@ -54,7 +55,7 @@ implement rule_print(r) = (
 
 implement rule_free(r) =
 	let
-		val+ @{level = l, precedence = p, name = n, pattern = pt, skeleton = sk} = r
+		val+ @{level = l, precedence = p, name = n, pattern = pt, skeleton = sk, kind = _} = r
 	in
 		strnptr_free(n);
 		pattern_free(pt);
