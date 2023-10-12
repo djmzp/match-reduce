@@ -1,8 +1,8 @@
-0 0 start : main => ( 2 + 3 ) * 3 + 4 ;
-0 0 paren : ( ?x ) => :x ;
-0 10 mult : ?x * ?y => :x :y mult ;
-0 5 add   : ?x + ?y => :x :y add ;
+0 0 start : main => ( 2 + 3 * ( 10 + 1 + ( 2 * 2 * 2 * 2 * 1999 ) ) ) * 3 + 4 ;
 
+0 20 paren : =( *x =) =>> :x ;
+0 10 mult : ?x * ?y =>> mult :x :y ;
+0 5 add   : ?x + ?y =>> add :x :y ;
 
-0 0 * : ?x ?y mult => $mult :x :y ;
-0 0 + : ?x ?y add => $add :x :y ;
+0 30 * : mult ?x ?y =>> $mult :x :y ;
+0 30 + : add ?x ?y =>> $add :x :y ;
